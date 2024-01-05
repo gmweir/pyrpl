@@ -677,8 +677,12 @@ class BoolIgnoreAttributeWidget(BoolAttributeWidget):
         self.widget.setCheckState(
             self._gui_to_attribute_mapping.inverse[new_value])
 
+if hasattr(pg, 'GraphicsWindow'):
+    __DataWidgetParent__ = pg.GraphicsWindow
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+    __DataWidgetParent__ = pg.GraphicsLayoutWidget
 
-class DataWidget(pg.GraphicsWindow):
+class DataWidget(__DataWidgetParent__):
     """
     A widget to plot real or complex datasets. To plot data, use the
     function _set_widget_value(new_value, transform_magnitude)
