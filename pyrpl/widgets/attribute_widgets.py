@@ -677,12 +677,27 @@ class BoolIgnoreAttributeWidget(BoolAttributeWidget):
         self.widget.setCheckState(
             self._gui_to_attribute_mapping.inverse[new_value])
 
-if hasattr(pg, 'GraphicsWindow'):
-    __DataWidgetParent__ = pg.GraphicsWindow
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-    __DataWidgetParent__ = pg.GraphicsLayoutWidget
 
-class DataWidget(__DataWidgetParent__):
+# ========================= #
+
+if hasattr(pg, 'GraphicsWindow'):
+    # GraphicsWindow = pg.GraphicsWindow
+
+    class GraphicsWindow(pg.GraphicsWindow):
+        def show(self):
+            pass
+
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+    # GraphicsWindow = pg.GraphicsLayoutWidget
+
+    class GraphicsWindow(pg.GraphicsLayoutWidget):
+        def __init__(self, *args, **kwargs):
+            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
+
+# ========================= #
+
+
+class DataWidget(GraphicsWindow):
     """
     A widget to plot real or complex datasets. To plot data, use the
     function _set_widget_value(new_value, transform_magnitude)
@@ -769,7 +784,7 @@ class PlotAttributeWidget(BaseAttributeWidget):
         Sets the widget (here a QCheckbox)
         :return:
         """
-        self.widget = pg.GraphicsWindow(title="Plot")
+        self.widget = pg.GraphicsLayoutWidget(title="Plot")
         legend = getattr(self.module.__class__, self.attribute_name).legend
         self.pw = self.widget.addPlot(title="%s vs. time (s)"%legend)
         self.plot_start_time = self.time()
@@ -822,7 +837,7 @@ class DataAttributeWidget(PlotAttributeWidget):
     """
 
     def _make_widget(self):
-        self.widget = pg.GraphicsWindow(title="Curve")
+        self.widget = pg.GraphicsLayoutWidget(title="Curve")
         self.plot_item = self.widget.addPlot(title="Curve")
         self.plot_item_phase = self.widget.addPlot(row=1, col=0, title="Phase (deg)")
         self.plot_item_phase.setXLink(self.plot_item)

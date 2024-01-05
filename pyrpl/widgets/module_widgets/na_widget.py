@@ -37,6 +37,7 @@ output selected in :code:`output_direct`.
   (not implemented at the moment).
 """
 
+from .version_wrap import GraphicsWindow
 from .base_module_widget import ModuleWidget
 from.acquisition_module_widget import AcquisitionModuleWidget
 
@@ -45,21 +46,6 @@ import pyqtgraph as pg
 from time import time
 import numpy as np
 import sys
-
-
-if hasattr(pg, 'GraphicsWindow'):
-    GraphicsWindow = pg.GraphicsWindow
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-
-    class GraphicsWindow(pg.GraphicsLayoutWidget):
-        def __init__(self, *args, **kwargs):
-            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
-
-    # Note:  We need to implement the show variable, and test it.
-    # i.e.
-    #    win = GraphicsLayoutWidget(show=True, title="Scope")
-    #    win.show()
-
 
 
 class NaWidget(AcquisitionModuleWidget):
@@ -125,7 +111,7 @@ class NaWidget(AcquisitionModuleWidget):
             self.attribute_layout.addWidget(self.groups[label])
             for index, wid in enumerate(wids):
                 self.attribute_layout.removeWidget(aws[wid])
-                self.layout_groups[label].addWidget(aws[wid], index%2 + 1, index/2 + 1)
+                self.layout_groups[label].addWidget(aws[wid], int(index%2 + 1), int(index/2 + 1))
         #########################
 
 
@@ -359,6 +345,7 @@ class NaWidget(AcquisitionModuleWidget):
 
 
 class MyGraphicsWindow(GraphicsWindow):
+
     def __init__(self, title, parent_widget):
         super(MyGraphicsWindow, self).__init__(title)
         self.parent_widget = parent_widget

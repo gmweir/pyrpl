@@ -186,4 +186,3 @@ class Event(asyncio.Event):
             # The loop parameter was removed in asyncio version 3.10
             super(Event, self).__init__(loop=LOOP)
 
-
