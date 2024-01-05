@@ -343,7 +343,12 @@ class NaWidget(AcquisitionModuleWidget):
     #    self.module.stop()
 
 
-class MyGraphicsWindow(pg.GraphicsWindow):
+if hasattr(pg, 'GraphicsWindow'):
+    __DataWidgetParent__ = pg.GraphicsWindow
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+    __DataWidgetParent__ = pg.GraphicsLayoutWidget
+
+class MyGraphicsWindow(__DataWidgetParent__):
     def __init__(self, title, parent_widget):
         super(MyGraphicsWindow, self).__init__(title)
         self.parent_widget = parent_widget
