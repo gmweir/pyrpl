@@ -10,13 +10,18 @@ import sys
 from ... import APP
 
 
+
 if hasattr(pg, 'GraphicsWindow'):
-    __DataWidgetParent__ = pg.GraphicsWindow
+    GraphicsWindow = pg.GraphicsWindow
+
 elif hasattr(pg, 'GraphicsLayoutWidget'):
-    __DataWidgetParent__ = pg.GraphicsLayoutWidget
+
+    class GraphicsWindow(pg.GraphicsLayoutWidget):
+        def __init__(self, *args, **kwargs):
+            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
 
 
-class MyGraphicsWindow(__DataWidgetParent__):
+class MyGraphicsWindow(GraphicsWindow):
     def __init__(self, title, parent):
         super(MyGraphicsWindow, self).__init__(title)
         self.parent = parent

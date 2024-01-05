@@ -41,6 +41,20 @@ from .base_module_widget import ModuleWidget
 from .acquisition_module_widget import AcquisitionModuleWidget
 
 
+if hasattr(pg, 'GraphicsWindow'):
+    GraphicsWindow = pg.GraphicsWindow
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+
+    class GraphicsWindow(pg.GraphicsLayoutWidget):
+        def __init__(self, *args, **kwargs):
+            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
+
+    # Note:  We need to implement the show variable, and test it.
+    # i.e.
+    #    win = GraphicsLayoutWidget(show=True, title="Scope")
+    #    win.show()
+
+
 class ScopeWidget(AcquisitionModuleWidget):
     """
     Widget for scope
@@ -121,7 +135,7 @@ class ScopeWidget(AcquisitionModuleWidget):
 
         #self.setLayout(self.main_layout)
         self.setWindowTitle("Scope")
-        self.win = pg.GraphicsWindow(title="Scope")
+        self.win = GraphicsWindow(title="Scope")
         self.plot_item = self.win.addPlot(title="Scope")
         self.plot_item.showGrid(y=True, alpha=1.)
 

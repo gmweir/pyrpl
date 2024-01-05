@@ -47,6 +47,21 @@ import numpy as np
 import sys
 
 
+if hasattr(pg, 'GraphicsWindow'):
+    GraphicsWindow = pg.GraphicsWindow
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+
+    class GraphicsWindow(pg.GraphicsLayoutWidget):
+        def __init__(self, *args, **kwargs):
+            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
+
+    # Note:  We need to implement the show variable, and test it.
+    # i.e.
+    #    win = GraphicsLayoutWidget(show=True, title="Scope")
+    #    win.show()
+
+
+
 class NaWidget(AcquisitionModuleWidget):
     """
     Network Analyzer Tab.
@@ -65,13 +80,13 @@ class NaWidget(AcquisitionModuleWidget):
         self.button_layout = QtWidgets.QHBoxLayout()
         #self.setLayout(self.main_layout)
         self.setWindowTitle("NA")
-        self.win = pg.GraphicsWindow(title="Magnitude")
+        self.win = GraphicsWindow(title="Magnitude")
 
         self.label_benchmark = pg.LabelItem(justify='right')
         self.win.addItem(self.label_benchmark, row=1,col=0)
         self._last_benchmark_value = np.nan
 
-        self.win_phase = pg.GraphicsWindow(title="Phase")
+        self.win_phase = GraphicsWindow(title="Phase")
         self.plot_item = self.win.addPlot(row=1, col=0, title="Magnitude (dB)")
         self.plot_item_phase = self.win_phase.addPlot(row=1, col=0,
                                                       title="Phase (deg)")
@@ -343,12 +358,7 @@ class NaWidget(AcquisitionModuleWidget):
     #    self.module.stop()
 
 
-if hasattr(pg, 'GraphicsWindow'):
-    __DataWidgetParent__ = pg.GraphicsWindow
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-    __DataWidgetParent__ = pg.GraphicsLayoutWidget
-
-class MyGraphicsWindow(__DataWidgetParent__):
+class MyGraphicsWindow(GraphicsWindow):
     def __init__(self, title, parent_widget):
         super(MyGraphicsWindow, self).__init__(title)
         self.parent_widget = parent_widget
