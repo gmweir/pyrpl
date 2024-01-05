@@ -9,7 +9,14 @@ import numpy as np
 import sys
 from ... import APP
 
-class MyGraphicsWindow(pg.GraphicsWindow):
+
+if hasattr(pg, 'GraphicsWindow'):
+    __DataWidgetParent__ = pg.GraphicsWindow
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+    __DataWidgetParent__ = pg.GraphicsLayoutWidget
+
+
+class MyGraphicsWindow(__DataWidgetParent__):
     def __init__(self, title, parent):
         super(MyGraphicsWindow, self).__init__(title)
         self.parent = parent
