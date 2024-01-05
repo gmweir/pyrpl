@@ -57,6 +57,21 @@ if APP is None:
     APP = QtWidgets.QApplication(['pyrpl'])
 
 
+# =========================== #
+
+# The loop variable has been deprecated in asyncio version 3.10. This is part of deprecation of get_event_loop(). For python version > 3.6, we are supposed to use asyncio.run instead
+__pyversion__ = sys.version.split(' ')[0]
+
+# Split the python version into a tuple, and omit minor versions
+if tuple(map(int, (__pyversion__.split("."))))[:2] >= (3,10):
+    loop_deprecated = True
+else:
+    loop_deprecated = False
+
+# =========================== #
+
+
+# Unfortunately, Qt did not get the memo on loop deprecation:
 LOOP = quamash.QEventLoop() # Since tasks scheduled in this loop seem to
 # fall in the standard QEventLoop, and we never explicitly ask to run this
 # loop, it might seem useless to send all tasks to LOOP, however, a task
@@ -67,15 +82,26 @@ async def sleep_async(time_s):
     """
     Replaces asyncio.sleep(time_s) inside coroutines. Deals properly with
     IPython kernel integration.
+
+    This issue was fixed in ipython. Let's assume it is still fixed if loop is deprecated.
     """
-    await asyncio.sleep(time_s, loop=LOOP)
+    if loop_deprecated:
+        await asyncio.sleep(time_s)
+    else:
+        await asyncio.sleep(time_s, loop=LOOP)
+
 
 def ensure_future(coroutine):
     """
     Schedules the task described by the coroutine. Deals properly with
     IPython kernel integration.
+
+    This issue was fixed in ipython.
+
+    Note: ensure_future was deprecated in python 3.10, but is still there
     """
     return asyncio.ensure_future(coroutine, loop=LOOP)
+
 
 def wait(future, timeout=None):
     """
@@ -90,17 +116,32 @@ def wait(future, timeout=None):
     BEWARE: never use wait in a coroutine (use builtin await instead)
     """
     assert isinstance(future, Future) or iscoroutine(future)
-    new_future = ensure_future(asyncio.wait({future},
-                                            timeout=timeout,
-                                            loop=LOOP))
+
+    # Note:  asyncio.wait does not raise a Timeouterror. Anything still occuring after the timeout is passed on to the output as
+    #     done, pending = await asyncio.wait(fs)
+    if loop_deprecated:
+        if iscoroutine(future):
+            # Coroutine passage to asyncio.wait was forbidden in python 3.11.
+            #
+            # Alternatively, could use asyncio.gather, which does work with coroutines.
+            future = asyncio.create_task(future)
+
+        new_future = ensure_future(asyncio.wait({future}, timeout=timeout))
+    else:
+        new_future = ensure_future(asyncio.wait({future},
+                                                timeout=timeout,
+                                                loop=LOOP))
+
     #if sys.version>='3.7': # this way, it was not possible to execute wait
                             # behind a qt slot !!!
     #    LOOP.run_until_complete(new_future)
     #    done, pending = new_future.result()
     #else:
+
     loop = QtCore.QEventLoop()
     def quit(*args):
         loop.quit()
+
     new_future.add_done_callback(quit)
     loop.exec_()
     done, pending = new_future.result()
@@ -108,6 +149,7 @@ def wait(future, timeout=None):
         return future.result()
     else:
         raise TimeoutError("Timout exceeded")
+
 
 def sleep(time_s):
     """
@@ -138,4 +180,10 @@ class Event(asyncio.Event):
     """
 
     def __init__(self):
-        super(Event, self).__init__(loop=LOOP)
+        if loop_deprecated:
+            super(Event, self).__init__()
+        else:
+            # The loop parameter was removed in asyncio version 3.10
+            super(Event, self).__init__(loop=LOOP)
+
+
