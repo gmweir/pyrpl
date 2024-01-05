@@ -96,15 +96,8 @@ from .base_module_widget import ReducedModuleWidget, ModuleWidget
 from ...pyrpl_utils import get_base_module_class
 from ... import APP
 
+from .version_wrap import GraphicsWindow
 
-if hasattr(pg, 'GraphicsWindow'):
-    GraphicsWindow = pg.GraphicsWindow
-
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-
-    class GraphicsWindow(pg.GraphicsLayoutWidget):
-        def __init__(self, *args, **kwargs):
-            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
 
 
 
@@ -449,6 +442,7 @@ class OutputSignalWidget(ModuleWidget):
 
         self.win = GraphicsWindow(title="Amplitude")
         self.win_phase = GraphicsWindow(title="Phase")
+
         self.plot_item = self.win.addPlot(title="Magnitude (dB)")
         self.plot_item_phase = self.win_phase.addPlot(title="Phase (deg)")
         self.plot_item.showGrid(y=True, x=True, alpha=1.)

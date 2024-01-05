@@ -9,21 +9,14 @@ import numpy as np
 import sys
 from ... import APP
 
-
-
-if hasattr(pg, 'GraphicsWindow'):
-    GraphicsWindow = pg.GraphicsWindow
-
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-
-    class GraphicsWindow(pg.GraphicsLayoutWidget):
-        def __init__(self, *args, **kwargs):
-            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
+from .version_wrap import GraphicsWindow
 
 
 class MyGraphicsWindow(GraphicsWindow):
+
     def __init__(self, title, parent):
-        super(MyGraphicsWindow, self).__init__(title)
+        super(MyGraphicsWindow, self).__init__()
+        self.title = title
         self.parent = parent
         self.setToolTip("-----plot legend---------------\n"
                         "yellow: theoretical IIR transfer function\n"
@@ -373,8 +366,8 @@ class IirWidget(ModuleWidget):
                                   list(self._phase(tf)),
                                   brush,
                                   size))]
-            self.graph_widget.plots[end].setPoints(mag)
-            self.graph_widget.plots[end+'_phase'].setPoints(phase)
+            self.graph_widget.plots[end].setData(mag)
+            self.graph_widget.plots[end+'_phase'].setData(phase)
         # plot the measurement data if desired
         if self.module.plot_measurement and hasattr(self.module, '_measurement_data'):
             f, v = self.module._measurement_data
