@@ -14,6 +14,27 @@ from ..curvedb import CurveDB
 
 import sys
 
+
+# ========================= #
+
+if hasattr(pg, 'GraphicsWindow'):
+    # GraphicsWindow = pg.GraphicsWindow
+
+    class GraphicsWindow(pg.GraphicsWindow):
+        def show(self):
+            pass
+
+elif hasattr(pg, 'GraphicsLayoutWidget'):
+    # GraphicsWindow = pg.GraphicsLayoutWidget
+
+    class GraphicsWindow(pg.GraphicsLayoutWidget):
+        def __init__(self, *args, **kwargs):
+            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
+
+# ========================= #
+
+
+
 # TODO: try to remove widget_name from here (again)
 class BaseAttributeWidget(QtWidgets.QWidget):
     """
@@ -678,23 +699,6 @@ class BoolIgnoreAttributeWidget(BoolAttributeWidget):
             self._gui_to_attribute_mapping.inverse[new_value])
 
 
-# ========================= #
-
-if hasattr(pg, 'GraphicsWindow'):
-    # GraphicsWindow = pg.GraphicsWindow
-
-    class GraphicsWindow(pg.GraphicsWindow):
-        def show(self):
-            pass
-
-elif hasattr(pg, 'GraphicsLayoutWidget'):
-    # GraphicsWindow = pg.GraphicsLayoutWidget
-
-    class GraphicsWindow(pg.GraphicsLayoutWidget):
-        def __init__(self, *args, **kwargs):
-            super(GraphicsWindow, self).__init__(*args, show=True, **kwargs)
-
-# ========================= #
 
 
 class DataWidget(GraphicsWindow):
@@ -784,7 +788,7 @@ class PlotAttributeWidget(BaseAttributeWidget):
         Sets the widget (here a QCheckbox)
         :return:
         """
-        self.widget = pg.GraphicsLayoutWidget(title="Plot")
+        self.widget = GraphicsWindow(title="Plot")
         legend = getattr(self.module.__class__, self.attribute_name).legend
         self.pw = self.widget.addPlot(title="%s vs. time (s)"%legend)
         self.plot_start_time = self.time()
@@ -837,7 +841,7 @@ class DataAttributeWidget(PlotAttributeWidget):
     """
 
     def _make_widget(self):
-        self.widget = pg.GraphicsLayoutWidget(title="Curve")
+        self.widget = GraphicsWindow(title="Curve")
         self.plot_item = self.widget.addPlot(title="Curve")
         self.plot_item_phase = self.widget.addPlot(row=1, col=0, title="Phase (deg)")
         self.plot_item_phase.setXLink(self.plot_item)
